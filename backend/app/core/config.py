@@ -1,10 +1,11 @@
-from pydantic_settings import BaseSettings,SettingsConfigDict
+from pydantic_settings import BaseSettings,SettingsConfigDict 
 
 
-class Settings:
+class Settings(BaseSettings):
     app_name: str = "Syntrix"
     app_version:str = "1.0.0"
     debug:bool = False
+    database_url:str
 
     model_config = SettingsConfigDict(
         env_file=".env",
