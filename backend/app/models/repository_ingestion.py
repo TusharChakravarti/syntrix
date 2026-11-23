@@ -1,12 +1,16 @@
 from datetime import datetime
 
 from sqlalchemy import String,DateTime,ForeignKey,Text,func
-from  sqlalchemy.orm import Mapped,mapped_column
-
+from  sqlalchemy.orm import Mapped,mapped_column,relationship
 from app.models.base import Base
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.repository import Repository
 
 
-class RepositoryIngestionZ(Base):
+
+class RepositoryIngestion(Base):
     __tablename__ = "repository_ingestions"
 
     id:Mapped[int] = mapped_column(primary_key=True)
@@ -39,3 +43,6 @@ class RepositoryIngestionZ(Base):
         nullable=False
     )
 
+    repository:Mapped["Repository"] = relationship(
+        back_populates="ingestions"
+    )

@@ -1,9 +1,14 @@
 from datetime import datetime
 
 from sqlalchemy import String,DateTime,func
-from sqlalchemy.orm import Mapped,mapped_column
-
+from sqlalchemy.orm import Mapped,mapped_column,relationship
+from typing import TYPE_CHECKING
 from app.models.base import Base
+if TYPE_CHECKING:
+    from app.models.organization_membership import OrganizationMembership
+    from app.models.repository import Repository
+
+
 
 class Organization(Base):
     __tablename__ = "organizations"
@@ -27,3 +32,13 @@ class Organization(Base):
         server_default=func.now(),
         nullable=False
     )
+
+    memberships: Mapped[list["OrganizationMembership"]] = relationship(
+        back_populates="organization"
+    )
+  # one org can have many memebers
+    repositories:Mapped[list["Repository"]]  = relationship(
+        back_populates="organization"
+    )
+
+# one org can have many repo

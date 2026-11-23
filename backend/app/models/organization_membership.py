@@ -1,11 +1,16 @@
 from sqlalchemy import String,ForeignKey,UniqueConstraint
-from sqlalchemy.orm import Mapped,mapped_column
+from sqlalchemy.orm import Mapped,mapped_column,relationship
 
 from app.models.base import Base
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.organization import Organization
+    from app.models.user import User
 
 
 class  OrganizationMembership(Base):
-    __tablename__ = "organization_membership"
+    __tablename__ = "organization_memberships"
 
     __table_args__ = (
         UniqueConstraint(
@@ -30,4 +35,11 @@ class  OrganizationMembership(Base):
         String(50),
         nullable=False,
         default="developer"
+    )
+
+    user:Mapped["User"] = relationship(
+        back_populates="memberships"
+    )
+    organization:Mapped["Organization"] = relationship(
+        back_populates="memberships"
     )
