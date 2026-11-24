@@ -34,7 +34,8 @@ class Organization(Base):
     )
 
     memberships: Mapped[list["OrganizationMembership"]] = relationship(
-        back_populates="organization"
+        back_populates="organization",
+        passive_deletes=True
     )
   # one org can have many memebers
     repositories:Mapped[list["Repository"]]  = relationship(

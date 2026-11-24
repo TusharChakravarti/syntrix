@@ -13,3 +13,7 @@ class UserResponse(BaseModel):
     full_name:str|None = None
 
     model_config = ConfigDict(from_attributes=True)
+
+class UserUpdate(BaseModel):
+    email:EmailStr | None = None
+    full_name:str | None = None

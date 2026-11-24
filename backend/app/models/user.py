@@ -28,5 +28,6 @@ class User(Base):
         nullable=True
     )
     memberships:Mapped[list["OrganizationMembership"]] = relationship(
-        back_populates="user"
+        back_populates="user",
+        passive_deletes=True
     )
