@@ -7,17 +7,22 @@ async def create_user(
         email:str,
         full_name:str | None = None
 )->User:
-    user = User(
-        clerk_user_id = clerk_user_id,
-        email = email,
-        full_name = full_name
+    try:
+        user = User(
+            clerk_user_id = clerk_user_id,
+            email = email,
+            full_name = full_name
 
-    )
+        )
 
-    db.add(user)
-    await db.commit()
+        db.add(user)
+        await db.commit()
+        
+        return user
+    except Exception:
+        await db.rollback()
+        raise
 
-    return user
 
 async def get_user(
         db:AsyncSession,

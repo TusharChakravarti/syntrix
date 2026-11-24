@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_db
 from app.schemas.organization import OrganizationCreate,OrganizationResponse,OrganizationUpdate
+from sqlalchemy.exc import IntegrityError
 
 from app.services.organization_service import (
     create_organization,
@@ -20,6 +21,7 @@ async def register_organization(
       user_id:int,
       db:AsyncSession = Depends(get_db)
 ):
+    try:
 
         return await create_organization(
                    db = db,
@@ -29,6 +31,20 @@ async def register_organization(
             
 
         )
+    except IntegrityError as e:
+        error_message = str(e.orig)
+        if "organizations_slug_key" in error_message:
+              raise HTTPException(
+                status_code=409,
+                detail="Organization slug already exists",
+            )
+
+        raise HTTPException(
+            status_code=500,
+             detail="Could not create organization",
+        )
+
+
  
 
 
@@ -62,20 +78,35 @@ async def update_organization_details(
     organization_id:int,
     organization_data:OrganizationUpdate,
     db:AsyncSession = Depends(get_db),
-):
-    organization = await update_organization(
-        db,
-        organization_id,
-        organization_data
-    )
 
-    if not organization:
-        raise HTTPException(
-            status_code=404,
-            detail = "Organization not found",
+):
+    try:
+        organization = await update_organization(
+            db,
+            organization_id,
+            organization_data
         )
 
-    return organization
+        if not organization:
+            raise HTTPException(
+                status_code=404,
+                detail = "Organization not found",
+            )
+
+        return organization
+    except IntegrityError as e:
+        error_message = str(e.orig)
+
+        if "organizations_slug_key" in error_message:
+                raise HTTPException(
+                    status_code=409,
+                    detail="Organization slug already exists",
+                )
+        raise HTTPException(
+                status_code=500,
+                detail="Could not update organization",
+            )
+        
 
 
 @router.delete("/{organization_id}")

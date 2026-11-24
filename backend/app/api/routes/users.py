@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_db
 from app.schemas.user import UserCreate,UserResponse,UserUpdate
 from app.services.user_service import (create_user,get_user,update_user,delete_user)
-
+from sqlalchemy.exc import IntegrityError
 
 router = APIRouter(prefix="/users",tags=["Users"])
 
@@ -29,13 +29,23 @@ async def register_user(
 
 
 
-    except Exception as e:
-       await db.rollback()
-       print("User CREATION ERROR",repr(e))
-       raise HTTPException(
-           status_code=500,
-           detail="Could not create user"
-       )
+    except IntegrityError as e:
+        error_message = str(e.orig)
+
+        if "users_email_key" in error_message:
+               raise HTTPException(
+                status_code=409,
+                detail="Email already registered",
+            )
+        if "users_clerk_user_id" in error_message:
+            raise HTTPException(
+                status_code=500,
+                detail="Could not create user",
+            )
+        
+
+
+
 
 
 # get the user_    
@@ -59,13 +69,27 @@ async def update_user_details(
     user_data:UserUpdate,
     db:AsyncSession = Depends(get_db)
 ):
-    user = await update_user(db,user_id,user_data)
-    if not user:
+    try:
+        user = await update_user(db,user_id,user_data)
+        if not user:
+            raise HTTPException(
+                status_code=404,
+                detail = "User not found"
+            )
+        
+        return user
+    except IntegrityError as e:
+        error_message = str(e.orig)
+
+        if "users_email_key" in error_message:
+            raise HTTPException(
+                status_code=409,
+                detail="Email already registered"
+            )
         raise HTTPException(
-            status_code=404,
-            detail = "User not found"
+            status_code=500,
+            detail="Could not update user"
         )
-    return user
 
 
 @router.delete("/{user_id}")
