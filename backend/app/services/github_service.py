@@ -1,7 +1,7 @@
 import jwt
 import time
 from pathlib import Path
-
+import httpx
 from app.core.config import settings
 
 def create_github_jwt() ->str:
@@ -27,3 +27,20 @@ def create_github_jwt() ->str:
 
     return token
 
+async def get_github_installations():
+    token = create_github_jwt()
+
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept":"application/vnd.github+json"
+    }
+
+    async with httpx.AsyncClient() as client:
+        response = await client.get(
+            "https://api.github.com/app/installations",
+            headers=headers
+        )
+
+    response.raise_for_status()
+
+    return response.json()
