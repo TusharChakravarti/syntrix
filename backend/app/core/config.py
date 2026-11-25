@@ -7,10 +7,14 @@ class Settings(BaseSettings):
     debug:bool = False
     database_url:str
 
+    github_app_id:int
+    github_private_key_path:str
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
         extra="ignore"
+
     )
 
 settings = Settings()
